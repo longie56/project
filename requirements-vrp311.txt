@@ -1,0 +1,7 @@
+torch==2.12.0
+numpy==2.4.6
+ortools==9.15.6755
+pyvrp==0.13.4
+gurobipy==13.0.2
+matplotlib==3.10.9
+tqdm==4.67.3
