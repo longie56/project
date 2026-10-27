@@ -179,4 +179,6 @@ If you use this repository, please cite the associated manuscript once it become
 
 ## License
 
+This archived section records the repository's former status. The current repository is licensed under the [MIT License](../LICENSE).
+
 No license file is currently included. Before reusing or redistributing this code, please contact the authors or add an explicit open-source license to the repository.

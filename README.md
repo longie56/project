@@ -33,4 +33,4 @@ The formal POMO identity used the `physical_pref_v3_wait40_slack5` base variant,
 - The cleanup-selection diagnostic compares old and corrected selection on **previously seen W05-I development instances**. It does not replace the original main panel or constitute a new blind test.
 - `OR-Tools` and `PyVRP` proxy solutions require replay in the common UAV physics before comparison. Feasibility, unserved customers, tardiness, energy, and time should be reported alongside cost.
 
-The repository currently has no explicit software license. Public visibility alone does not grant a reuse license; the owner must choose and add one before describing this release as licensed open source.
+This repository is licensed under the [MIT License](LICENSE). Third-party dependencies retain their own licenses.
