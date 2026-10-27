@@ -1,0 +1,288 @@
+{
+  "task_id": "TRE-static-gu-v3-compact-formal-20261017",
+  "status": "frozen_formal",
+  "revision_scope": "compact_no_film_no_ega_20261017",
+  "physics_spec": "docs/pretrain_20261012/revision_v3_gu_hexacopter_physics.json",
+  "source_boundary": "Gu et al. parameters and aerodynamic equations only; all following operational settings are declared synthetic study choices",
+  "coordinate_side_m": 4000.0,
+  "depot_xy_unit": [
+    0.5,
+    0.5
+  ],
+  "customer_mass_uniform_kg": [
+    0.1,
+    0.3
+  ],
+  "service_mode": "hovering_package_handoff",
+  "service_seconds": 5.0,
+  "early_wait_mode": "hover_at_customer",
+  "depot_wait_mode": "ground_wait_without_propulsion_until_next_useful_release_departure",
+  "depot_turnaround_seconds_before_each_sortie": 60.0,
+  "vertical_flight_and_turn_energy": "excluded_from_main_steady_level_flight_model; predeclared sensitivity required",
+  "final_depot_return_required": true,
+  "mission_horizon_seconds_by_n": {
+    "20": 10800.0,
+    "50": 18000.0,
+    "100": 28800.0
+  },
+  "ready_time_uniform_fraction_of_horizon": [
+    0.0,
+    0.5
+  ],
+  "soft_window_fraction_of_horizon": "0.08 + 0.20 * tightness",
+  "baseline_tightness": 0.7,
+  "main_extra_battery_reserve_fraction": 0.0,
+  "time_objective": "all flight legs including final depot return",
+  "energy_objective": "all sortie cruise and customer hover energy, summed over the mission",
+  "tardiness_rule": "positive part of service_start minus desired_due",
+  "objective_scale": {
+    "flight_time_seconds_divisor": 3600.0,
+    "energy_joules_divisor": 450000.0,
+    "tardiness_seconds_divisor": 3600.0
+  },
+  "objective_variants": {
+    "C0": "alpha*T_fly/3600 + (1-alpha)*E_total/450000 + tardiness/3600",
+    "C1": "alpha*(T_fly+tardiness)/3600 + (1-alpha)*E_total/450000; requires independent training"
+  },
+  "training_selection_penalties": {
+    "per_unserved_order": 100.0,
+    "incomplete_or_invalid_route": 100.0,
+    "scope": "REINFORCE rollout selection and validation checkpoint only; raw C0/C1 and feasibility are reported separately"
+  },
+  "delivery_rule": "only orders explicitly loaded at depot may be delivered; undelivered packages return to depot inventory",
+  "training_epochs": 100,
+  "training_learning_rate": 0.0001,
+  "training_entropy_start": 0.02,
+  "training_entropy_end": 0.002,
+  "training_speed_aux_weight": 5.0,
+  "training_speed_head_lr_multiplier": 10.0,
+  "speed_calibration_instances_per_kind": 12,
+  "speed_calibration_fit_instances_per_kind": 8,
+  "speed_calibration_epochs": 80,
+  "speed_calibration_global_mix": 1.0,
+  "speed_calibration_nonlocal_weight": 20.0,
+  "formal_shared_wait_prior": {
+    "wait_urgency_coefficient": 40.0,
+    "wait_slack_coefficient": 5.0,
+    "wait_slack_buffer_fraction": 0.1
+  },
+  "formal_variant_allowlist": [
+    "physical_pref_v3_wait40_slack5",
+    "pmoco_adapted_v3_with_aux_wait40_slack5",
+    "physical_pref_wo_route_features_v3_wait40_slack5"
+  ],
+  "training_checkpoint_every_epochs": 1,
+  "training_pomo_starts": "all_legal_initial_loads_evenly_balanced_across_pomo_slots",
+  "training_seeds": [
+    11,
+    23,
+    37
+  ],
+  "optimizer_updates_per_epoch_by_n": {
+    "20": 50,
+    "50": 40,
+    "100": 30
+  },
+  "training_microbatch_by_n": {
+    "20": 16,
+    "50": 16,
+    "100": 2
+  },
+  "training_grad_accum_steps_by_n": {
+    "20": 1,
+    "50": 1,
+    "100": 8
+  },
+  "training_effective_batch": 16,
+  "validation_chunk_by_n": {
+    "20": 64,
+    "50": 64,
+    "100": 64
+  },
+  "preference_train_interval": [
+    0.1,
+    0.9
+  ],
+  "preference_heldout_training_intervals": [
+    [
+      0.1,
+      0.35
+    ],
+    [
+      0.65,
+      0.9
+    ]
+  ],
+  "preference_heldout_evaluation_interval": [
+    0.4,
+    0.6
+  ],
+  "preference_fixed_training_values": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "validation_preference_values": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "preference_test_grid": [
+    0.0,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "validation_per_n_and_type": 64,
+  "formal_instance_seed_bases": {
+    "val": 7300000,
+    "test": 7400000
+  },
+  "validation_every_epochs": 5,
+  "online_end_to_end_budget_seconds": 5.0,
+  "online_pomo_by_n": {
+    "20": 20,
+    "50": 50,
+    "100": 100
+  },
+  "pomo_initial_load_start_rule": "evenly_spaced_over_legal_initial_loads_for_full_and_reduced_pomo",
+  "formal_greedy_strategy": "joint",
+  "same_task_long_budget_seconds_by_n": {
+    "20": 60.0,
+    "50": 60.0,
+    "100": 300.0
+  },
+  "solver_proxy_long_budget_seconds_by_n": {
+    "20": 60.0,
+    "50": 60.0,
+    "100": 300.0
+  },
+  "baseline_preference_values": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "test_per_n_and_type": {
+    "20": 50,
+    "50": 50,
+    "100": 50
+  },
+  "formal_experiment_matrix": [
+    {
+      "variant": "physical_pref_v3_wait40_slack5",
+      "n_nodes": 20,
+      "pref_mode": "random",
+      "fixed_alpha": null,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "physical_pref_v3_wait40_slack5",
+      "n_nodes": 50,
+      "pref_mode": "random",
+      "fixed_alpha": null,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "physical_pref_v3_wait40_slack5",
+      "n_nodes": 100,
+      "pref_mode": "random",
+      "fixed_alpha": null,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "pmoco_adapted_v3_with_aux_wait40_slack5",
+      "n_nodes": 20,
+      "pref_mode": "random",
+      "fixed_alpha": null,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "pmoco_adapted_v3_with_aux_wait40_slack5",
+      "n_nodes": 50,
+      "pref_mode": "random",
+      "fixed_alpha": null,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "pmoco_adapted_v3_with_aux_wait40_slack5",
+      "n_nodes": 100,
+      "pref_mode": "random",
+      "fixed_alpha": null,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "physical_pref_wo_route_features_v3_wait40_slack5",
+      "n_nodes": 50,
+      "pref_mode": "random",
+      "fixed_alpha": null,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "physical_pref_v3_wait40_slack5",
+      "n_nodes": 50,
+      "pref_mode": "heldout",
+      "fixed_alpha": null,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "physical_pref_v3_wait40_slack5",
+      "n_nodes": 20,
+      "pref_mode": "fixed",
+      "fixed_alpha": 0.1,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "physical_pref_v3_wait40_slack5",
+      "n_nodes": 20,
+      "pref_mode": "fixed",
+      "fixed_alpha": 0.5,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "physical_pref_v3_wait40_slack5",
+      "n_nodes": 20,
+      "pref_mode": "fixed",
+      "fixed_alpha": 0.9,
+      "objective_variant": "C0",
+      "energy_scenario": "gu_nominal"
+    },
+    {
+      "variant": "physical_pref_v3_wait40_slack5",
+      "n_nodes": 20,
+      "pref_mode": "random",
+      "fixed_alpha": null,
+      "objective_variant": "C1",
+      "energy_scenario": "gu_nominal"
+    }
+  ],
+  "training_microbatch_candidates_by_n": {
+    "20": [
+      16
+    ],
+    "50": [
+      16
+    ],
+    "100": [
+      2,
+      4,
+      8
+    ]
+  }
+}

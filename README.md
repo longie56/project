@@ -1,182 +1,36 @@
-# PC-EGA-POMO for Energy-Constrained UAV Routing
+# Preference-conditioned UAV routing: revised source
 
-This repository contains research code for a preference-conditioned deep reinforcement learning approach to energy-constrained unmanned aerial vehicle (UAV) routing with soft time windows. The core method, PC-EGA-POMO, extends policy optimization with multiple optima (POMO) by adding preference conditioning, energy-aware action scoring, dual-speed actions, and safe-return feasibility masking.
+This repository contains research code for energy-constrained UAV routing with soft time windows. The `revision_v3/` package is the **frozen compact implementation** used for the revised experiments: preference input, an action-level physical feature head, dual-speed actions, safe-return masking, and POMO multi-start decoding. The formal model does not use FiLM or the energy-gating module (EGA). Historical PC-EGA-POMO prototype code remains in the original top-level `model/`, `train/`, and `scripts/` directories; see [its archived README](docs/README_LEGACY_PC_EGA_POMO.md). Do not treat that prototype as the revised paper's final method.
 
-The project was developed for the paper:
+## Source map
 
-> A preference-conditioned deep reinforcement learning algorithm for energy-constrained UAV routing with soft time windows
+| Path | Purpose |
+| --- | --- |
+| `revision_v3/` | Frozen compact policy, physical environment, instance generator, training and evaluation source. |
+| `env/revision_v3_gu_physics.py` | Gu-v3 UAV physics used by the revised source. |
+| `formal_runs/20261022/` | Original first-dispatch, Pareto continuation, and paired-evaluation runner snapshots. |
+| `formal_runs/20261024/` | Original POMO main-panel evaluator, timing gate, and load-cleanup source snapshots. |
+| `diagnostics/cleanup_selection_20261027/` | Later *post hoc* development diagnostic for selecting candidates after load cleanup; not part of the original blind main panel. |
+| `docs/FROZEN_SOURCE_MANIFEST.md` | Source hashes and the relationship between frozen and later diagnostic code. |
 
-## What This Project Does
+The original formal runner snapshots retain absolute paths to the private experiment environment and its frozen artifacts. They document the executed implementation; they are **not** turnkey commands for reproducing the numerical tables from this repository alone. Model checkpoints, instance files, result rows, blind-test material, cloud backups, logs, and manuscript files are not included.
 
-The code studies a UAV routing setting where each route must jointly consider:
+## Environment
 
-- customer visiting order,
-- economical-speed and fast-speed flight modes,
-- payload-aware energy consumption,
-- battery and payload constraints,
-- soft time-window penalties,
-- repeated depot return and replenishment,
-- time-energy preference trade-offs.
-
-The main idea is to generate routes with a neural policy while explicitly injecting physical feasibility signals into decoding. The learned policy can also be combined with adaptive large neighborhood search (ALNS) for local repair and quality improvement.
-
-## Main Features
-
-- Preference-conditioned route generation with time-energy preference vectors.
-- Dual-speed action space: each customer can be selected with economical speed or fast speed.
-- Action-level physical features, including flight time, energy use, waiting time, tardiness risk, and energy margin.
-- Energy-gating bias and safe-return feasibility mask for energy-safe decoding.
-- POMO-style multi-start rollout training.
-- Optional ALNS repair using the neural solution as a warm start.
-- Baseline evaluation utilities for OR-Tools, PyVRP, and Gurobi.
-- Synthetic Solomon-style instance generation for R, C, RC, and mixed spatial distributions.
-
-## Repository Structure
-
-```text
-.
-|-- alns/          # ALNS repair solver
-|-- data/          # Solomon-style instance generator and Solomon loaders
-|-- env/           # UAV routing environment and transition logic
-|-- eval/          # OR-Tools, PyVRP, Gurobi, and route replay utilities
-|-- model/         # PC-EGA-POMO model, decoder, encoder, and variants
-|-- scripts/       # Training, evaluation, auditing, and figure/table utilities
-|-- train/         # Training loop and checkpoint handling
-|-- utils/         # Visualization utilities
-|-- config.py      # Main physical constants and hyperparameters
-|-- main.py        # Minimal training entry point
-`-- requirements-vrp311.txt
-```
-
-Large experimental artifacts, checkpoints, figures, tables, logs, and manuscript-processing files are intentionally excluded from the public repository.
-
-## Installation
-
-The code was developed with Python 3.11. A conda environment is recommended.
+The revised code was developed with Python 3.11 and PyTorch. Install the dependencies appropriate to your platform; `requirements-vrp311.txt` records the historical environment, including optional baseline solvers. Gurobi runs require a separate installation and license. To inspect the available revised commands from the repository root:
 
 ```bash
-conda create -n vrp311 python=3.11
-conda activate vrp311
-pip install -r requirements-vrp311.txt
+python -m revision_v3.train --help
+python -m revision_v3.evaluate --help
 ```
 
-Notes:
+The formal POMO identity used the `physical_pref_v3_wait40_slack5` base variant, followed by the separately frozen 40-update Pareto continuation (`D`) and protected candidate decoder (`B`). Source hashes and the frozen decision record identify the exact snapshot. Numerical claims require the corresponding protocols and completion records; the source tree alone does not supply those records.
 
-- Gurobi is optional for most neural training and baseline experiments, but scripts using `eval/gurobi_baseline.py` require a working Gurobi installation and license.
-- CUDA is recommended for training larger models, especially N50 and N100 instances.
-- CPU execution is sufficient for small smoke tests and some baseline utilities.
+## Reporting scope
 
-## Quick Smoke Test
+- A shared policy responds to preference inputs. The revised evidence does not establish a general quality advantage over separately trained fixed-preference policies.
+- Paired-evaluation and main-panel scripts distinguish training arm, decoding arm, candidate tier, physical feasibility, and wall-clock timing.
+- The cleanup-selection diagnostic compares old and corrected selection on **previously seen W05-I development instances**. It does not replace the original main panel or constitute a new blind test.
+- `OR-Tools` and `PyVRP` proxy solutions require replay in the common UAV physics before comparison. Feasibility, unserved customers, tardiness, energy, and time should be reported alongside cost.
 
-Run the physics-consistency smoke test from the repository root:
-
-```bash
-python scripts/smoke_physics_consistency.py
-```
-
-This checks that feasible actions produced by the environment mask preserve the route horizon and the required return-to-depot energy reserve.
-
-## Training
-
-A minimal training run can be launched with:
-
-```bash
-python main.py
-```
-
-For configurable experiments, use `scripts/train_variants.py`.
-
-Example N20 training:
-
-```bash
-python scripts/train_variants.py ^
-  --variant full ^
-  --epochs 100 ^
-  --steps-per-epoch 200 ^
-  --batch-size 64 ^
-  --n-nodes 20 ^
-  --n-pomo 20 ^
-  --problem-type MIXED ^
-  --pref-mode random ^
-  --output-dir checkpoints/n20_full
-```
-
-On Linux or macOS, replace the Windows line-continuation character `^` with `\`.
-
-The main model variants are defined in `model/variants.py`:
-
-- `full`: FiLM preference modulation + energy gating + speed-mode bias.
-- `film`: preference modulation only.
-- `ega`: FiLM + energy gating.
-- `no_film`: ablation without FiLM.
-- `no_action_features`: ablation without action-level physical feature scoring.
-- `vanilla`: basic model without the proposed conditioning and energy-aware modules.
-
-## Evaluation
-
-The main static evaluation script is:
-
-```bash
-python scripts/compare_baselines_n20.py
-```
-
-Example evaluation with a trained checkpoint:
-
-```bash
-python scripts/compare_baselines_n20.py ^
-  --instances 20 ^
-  --n-nodes 20 ^
-  --problem-type R ^
-  --pref-mode random ^
-  --variant full ^
-  --checkpoint checkpoints/n20_full/full_best.pt ^
-  --run-drl ^
-  --run-alns ^
-  --run-ortools-physical ^
-  --run-pyvrp ^
-  --output-json results_n20_r.json
-```
-
-The repository does not include pretrained checkpoints by default. To evaluate a pretrained model, place the checkpoint file under a local `checkpoints/` directory and pass its path through `--checkpoint`.
-
-## Dynamic Order Insertion
-
-Dynamic order insertion experiments are supported by:
-
-```bash
-python scripts/experiment_dynamic_insertion.py
-```
-
-This evaluates replanning from an executed route snapshot after new customer orders are inserted.
-
-## Experiment Protocol
-
-Additional notes for reproducibility and reporting are provided in:
-
-- `docs/experiment_protocol.md`
-- `docs/reproducibility_environment.md`
-
-These documents describe dataset naming, method families, metrics, and protocol distinctions such as real-time evaluation, quality-budget evaluation, and long-budget Gurobi diagnostics.
-
-## Important Reporting Notes
-
-When using this code for experiments, please distinguish:
-
-- `PC-EGA-POMO`: neural policy inference only.
-- `PC-EGA-POMO + ALNS`: neural policy followed by ALNS repair.
-- `OR-Tools physical` and `PyVRP`: classical proxy baselines replayed in the unified physical environment.
-- `Gurobi`: exact or incumbent MILP diagnostics depending on solver status, time limit, and certificate quality.
-
-For constrained UAV routing, feasibility, unvisited customers, and wall-clock time should be reported together with cost. A lower cost with worse feasibility should not be interpreted as a clean improvement.
-
-## Data
-
-The project includes a Solomon-style generator and Solomon benchmark loader utilities. In the associated experiments, test instances are generated by integrating spatial and time-window characteristics inspired by the Solomon benchmark with UAV-specific operational settings such as payload, battery, speed, and safe-return constraints.
-
-## Citation
-
-If you use this repository, please cite the associated manuscript once it becomes available. A BibTeX entry will be added after publication or public preprint release.
-
-## License
-
-No license file is currently included. Before reusing or redistributing this code, please contact the authors or add an explicit open-source license to the repository.
+This repository is licensed under the [MIT License](LICENSE). Third-party dependencies retain their own licenses.

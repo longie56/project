@@ -1,0 +1,285 @@
+{
+  "status": "frozen_formal",
+  "baseline_search_seed_base": 42,
+  "design": "one_factor_at_a_time_on_identical_frozen_instance_ids_and_preference_grid",
+  "comparison_sections": {
+    "primary_same_physical_task": [
+      "neural",
+      "neural_analytic_speed",
+      "greedy",
+      "alns_waitaware",
+      "nsga2_waitaware"
+    ],
+    "route_order_proxy_diagnostic": [
+      "ortools",
+      "pyvrp",
+      "gurobi"
+    ],
+    "speed_intervention_diagnostic": [
+      "neural_fixed_slow",
+      "neural_fixed_fast"
+    ]
+  },
+  "comparison_scope_rules": {
+    "primary_ranking": "Only complete results within the shared end-to-end budget and marked eligible_for_primary_same_task_ranking may enter the main same-task ranking.",
+    "proxy_reporting": "OR-Tools, PyVRP and Gurobi optimize a disclosed route-order surrogate, then receive v3 physical repair and replay. Report them in a separate diagnostic table.",
+    "native_bound_gap": "A native solver objective, bound or gap applies only to the route-order surrogate and is never a bound or gap for the complete nonlinear physical problem.",
+    "time_budget": "The reported budget covers construction or native search, physical repair, replay and result packaging for every method."
+  },
+  "interpretation": {
+    "frozen_policy_transfer": "same checkpoint, changed physical evaluator and hard masks; measures robustness but not optimal adaptation",
+    "matched_retraining": "independent 100-epoch checkpoint trained under the stated energy scenario and identical scale-specific update count",
+    "reference": "Gu et al. six-rotor parameters are source-reported; scenario multipliers and alternative functional form are declared study perturbations, not measured aircraft specifications"
+  },
+  "panels": {
+    "energy_model": [
+      {
+        "id": "nominal",
+        "energy_scenario": "gu_nominal",
+        "reserve_fraction": 0.0,
+        "time_window_scale": 1.0
+      },
+      {
+        "id": "hover_increment_drag",
+        "energy_scenario": "hover_increment_drag",
+        "reserve_fraction": 0.0,
+        "time_window_scale": 1.0
+      }
+    ],
+    "safe_reserve": [
+      {
+        "id": "reserve_000",
+        "energy_scenario": "gu_nominal",
+        "reserve_fraction": 0.0,
+        "time_window_scale": 1.0
+      },
+      {
+        "id": "reserve_005",
+        "energy_scenario": "gu_nominal",
+        "reserve_fraction": 0.05,
+        "time_window_scale": 1.0
+      },
+      {
+        "id": "reserve_010",
+        "energy_scenario": "gu_nominal",
+        "reserve_fraction": 0.1,
+        "time_window_scale": 1.0
+      }
+    ],
+    "time_windows": [
+      {
+        "id": "window_075",
+        "energy_scenario": "gu_nominal",
+        "reserve_fraction": 0.0,
+        "time_window_scale": 0.75
+      },
+      {
+        "id": "window_100",
+        "energy_scenario": "gu_nominal",
+        "reserve_fraction": 0.0,
+        "time_window_scale": 1.0
+      },
+      {
+        "id": "window_125",
+        "energy_scenario": "gu_nominal",
+        "reserve_fraction": 0.0,
+        "time_window_scale": 1.25
+      }
+    ]
+  },
+  "mandatory_report_fields": [
+    "header.task_spec_sha256",
+    "header.physics_spec_sha256",
+    "header.instance_manifest_sha256",
+    "header.method",
+    "header.checkpoint_variant",
+    "header.split",
+    "header.n_nodes",
+    "header.kind",
+    "header.preference_grid",
+    "header.slice_start",
+    "header.slice_end",
+    "header.subset_instance_count",
+    "header.planned_row_count",
+    "header.budget_tier",
+    "header.time_limit_s",
+    "header.search_seed",
+    "header.pomo",
+    "header.greedy_strategy",
+    "header.energy_scenario",
+    "row.instance_id",
+    "row.instance_index",
+    "row.alpha_time",
+    "row.alpha_energy",
+    "result.physics_id",
+    "result.feasible",
+    "result.failure_reason",
+    "result.metrics.unserved",
+    "result.metrics.flight_time_s",
+    "result.metrics.total_energy_j",
+    "result.metrics.tardiness_s",
+    "result.metrics.cost",
+    "result.metrics.depot_returns",
+    "result.metrics.min_return_battery_j",
+    "result.metrics.delivery_leg_count",
+    "result.metrics.return_leg_count",
+    "result.metrics.fast_delivery_fraction",
+    "result.metrics.fast_return_fraction",
+    "result.metrics.fast_all_flight_fraction",
+    "result.total_elapsed_s",
+    "result.time_limit_s",
+    "result.within_total_budget",
+    "result.comparison_eligible_under_budget",
+    "result.comparison_scope",
+    "result.eligible_for_primary_same_task_ranking",
+    "result.native_objective_scope",
+    "result.native_bound_gap_scope",
+    "header.evaluation_panel",
+    "header.instance_selection_rule"
+  ],
+  "matched_retraining_priority": {
+    "primary": "No additional energy-model retraining in the approved 36-run matrix. C1 is independently retrained on N20.",
+    "secondary": "Any additional energy-model retraining requires a prospective protocol amendment before blind test access.",
+    "claim_rule": "Frozen-policy alternative-energy results establish only transfer sensitivity, not matched-retraining optimality."
+  },
+  "revision_scope": "compact_no_film_no_ega_20261017",
+  "scope_by_panel": {
+    "main_scales": [
+      20,
+      50,
+      100
+    ],
+    "sensitivity_main_scale": 50,
+    "n100_boundary_followup": "fixed subset to be specified before blind test; no adaptive winner selection",
+    "long_budget_instances_per_kind": 20
+  },
+  "baseline_search_seeds": [
+    42,
+    43,
+    44
+  ],
+  "evaluation_panels": {
+    "main": {
+      "scales": [
+        20,
+        50,
+        100
+      ],
+      "methods": [
+        "neural",
+        "neural_analytic_speed",
+        "greedy",
+        "alns_waitaware",
+        "nsga2_waitaware",
+        "ortools",
+        "pyvrp",
+        "gurobi"
+      ],
+      "instances_per_kind": 50,
+      "preference_set": "baseline",
+      "budget_tiers": [
+        "online"
+      ],
+      "nominal_only": false
+    },
+    "long_subset": {
+      "scales": [
+        20,
+        50,
+        100
+      ],
+      "methods": [
+        "neural",
+        "neural_analytic_speed",
+        "greedy",
+        "alns_waitaware",
+        "nsga2_waitaware",
+        "ortools",
+        "pyvrp",
+        "gurobi"
+      ],
+      "instances_per_kind": 20,
+      "preference_set": "baseline",
+      "budget_tiers": [
+        "long"
+      ],
+      "nominal_only": true
+    },
+    "learned_analytic": {
+      "scales": [
+        20,
+        50,
+        100
+      ],
+      "methods": [
+        "neural",
+        "neural_analytic_speed"
+      ],
+      "instances_per_kind": 20,
+      "preference_set": "baseline",
+      "budget_tiers": [
+        "long"
+      ],
+      "nominal_only": true
+    },
+    "response_curve": {
+      "scales": [
+        20,
+        50,
+        100
+      ],
+      "methods": [
+        "neural",
+        "neural_analytic_speed"
+      ],
+      "instances_per_kind": 10,
+      "preference_set": "full",
+      "budget_tiers": [
+        "long"
+      ],
+      "nominal_only": true
+    },
+    "fixed_speed": {
+      "scales": [
+        50
+      ],
+      "methods": [
+        "neural",
+        "neural_fixed_slow",
+        "neural_fixed_fast"
+      ],
+      "instances_per_kind": 20,
+      "preference_set": "baseline",
+      "budget_tiers": [
+        "long"
+      ],
+      "nominal_only": true
+    },
+    "sensitivity": {
+      "scales": [
+        50
+      ],
+      "methods": [
+        "neural",
+        "neural_analytic_speed",
+        "greedy",
+        "alns_waitaware",
+        "nsga2_waitaware"
+      ],
+      "instances_per_kind": 50,
+      "preference_set": "baseline",
+      "budget_tiers": [
+        "long"
+      ],
+      "nominal_only": false
+    }
+  },
+  "fixed_speed_intervention": {
+    "design": "same_checkpoint_original_features_and_loading_waiting_masks_restrict_all_actual_flights",
+    "scope": "N50 three training seeds, first20 per kind, three preferences",
+    "additional_fixed_trajectories": 1080,
+    "opposite_speed_fallback": false,
+    "not_an_optimized_fixed_speed_baseline": true,
+    "report_distribution_shift_and_all_failure_denominators": true
+  }
+}
