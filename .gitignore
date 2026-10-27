@@ -15,6 +15,12 @@ __pycache__/
 *.pth
 *.ckpt
 *.zip
+*.jsonl
+*.tar
+*.tar.gz
+*.pem
+*.key
+.ssh/
 
 tmp_*
 
